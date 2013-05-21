@@ -13,7 +13,7 @@ import nltk
 from nltk.stem.lancaster import LancasterStemmer
 import pprint
 
-SIZE = 1000                           # the size of the set fetching from database. 
+SIZE = 100                           # the size of the set fetching from database. 
 OFFSET = 0                            # the offset of the set 
 OUTTOFILE = True                      # print the result to the file.
 END = "top" + str(SIZE + OFFSET)      # related to the name of the file.
@@ -81,7 +81,9 @@ def printscore(score, outtofile, end):
     print "Average score is: " + str(total / len(score[4])) + "\nMaximum score is: " + str(maximum) + "\nMinimum score is: " + str(minimum)
 
 if __name__ == "__main__":
-    cursor = scoresentence.dbConnect()
+    connect = scoresentence.dbConnect()
+    cursor = connect[0]
+    conn = connect[1]
     st = LancasterStemmer()
     cursor.execute("SELECT avg(star_sum/number), avg((star_sum / number) * (star_sum / number)) from word_star;")
     stat_data = cursor.fetchall()

@@ -16,11 +16,11 @@ tags = ["FW", "JJ", "JJR", "JJS", "NN", "NNP", "NNPS", "NNS", "RB", "RBR", "RBS"
 
 # This function is used to connect to the database.
 def dbConnect():
-    conn_string = "host='abstract.cs.washington.edu' port='5252' dbname='yelp' user='guest' password='guest123'"
+    conn_string = "host='abstract.cs.washington.edu' port='5252' dbname='yelp' user='db_guest' password='guest123'"
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     print "Succesfully Connected to database! \n"
-    return cursor
+    return (cursor, conn)
 
 # This function print the instruction.
 def printUsage():
@@ -37,7 +37,8 @@ def scoreSentence(cursor, page, st, avg_score, std_dev):
     weighted_score = []
     maximum = []
     minimum = []
-    
+    count = []
+
     temp = []
     for line in page:
         temp.append(line[0:-1]) #move away the new line character if using standard input.
@@ -45,7 +46,8 @@ def scoreSentence(cursor, page, st, avg_score, std_dev):
 
     for line in page:
         ret = processline(cursor, line, st, avg_score, std_dev)
-        
+        count.append(ret[0])
+
         if (ret[0] > 0):                  #If count > 0
             score.append(ret[1] / ret[0]) #score_sum / count
             maximum.append(ret[2])        #score_max
@@ -57,7 +59,7 @@ def scoreSentence(cursor, page, st, avg_score, std_dev):
             weighted_score.append(avg_score)
             maximum.append(0.0)
             minimum.append(5.0)
-    return (score, maximum, minimum, weighted_score)
+    return (score, maximum, minimum, weighted_score, count)
 
 # Process a line of sentence and return a field of score.
 # In the return field, maximum is the maximum score of the word in the sentence.
@@ -112,10 +114,12 @@ def printResult(page, score, avg_score, std_dev):
     print str(avg_score) + " is the average score of all the words in database."
     print str(std_dev) + " is the standard deviation of all the data.\n"
     for x in range(0, len(page)):
-        print "The sentence " + str(x + 1) + ": " + page[x] + "\tMaximum Score: " + str(score[1][x]) + "\n\tAverage Score: " + str(score[0][x]) + "\n\tMinimum Score: " + str(score[2][x]) + "\n\tWeighted Score: " + str(score[3][x])       
+        print "The sentence " + str(x + 1) + ": " + page[x] + "\tValuable Word Length: " + str(score[4][x]) + "\n\tMaximum Score: " + str(score[1][x]) + "\n\tAverage Score: " + str(score[0][x]) + "\n\tMinimum Score: " + str(score[2][x]) + "\n\tWeighted Score: " + str(score[3][x])       
 
 if __name__ == "__main__":
-    cursor = dbConnect()
+    connect = dbConnect()
+    conn = connect[1]
+    cursor = connect[0]
     printUsage()
     page = sys.stdin.readlines()
     st = LancasterStemmer()

@@ -16,7 +16,7 @@ CUTOFF = 3    # Will not consider the word with frequency less than 3
 TOFILE = True # True if print to file; False to insert to database.
 
 # Fecth review data from the database to calculate the average star of each word
-def parseword():
+def parseword(cursor):
     cursor.execute("SELECT content, stars FROM yelp_review_flat limit 1000;")
     records = cursor.fetchall()
     st = LancasterStemmer()
